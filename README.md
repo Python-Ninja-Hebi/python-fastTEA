@@ -19,7 +19,7 @@ Inspired by The Elm Architecture (TEA), fastTEA brings simplicity and predictabi
 Install fastTEA using pip:
 
 ```bash
-pip install fasttea
+pip install fasttea-web
 ```
 
 ## Quick Start
