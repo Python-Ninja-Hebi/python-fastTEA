@@ -1,0 +1,4 @@
+pydantic
+toml
+fastapi
+rich
