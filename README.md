@@ -38,10 +38,9 @@ app = FastTEA(AppModel(), css_framework=CSSFramework.PICO)
 
 @app.update
 def update(msg: Msg, model: AppModel) -> tuple[AppModel, Cmd | None]:
-    if msg.action == "update_name":
-        model.name = msg.payload["name"]
-    elif msg.action == "greet":
-        model.greeting = f"Hello {model.name}!"
+    if msg.action == "greet":
+        model.name = msg.value
+        model.greeting = f"Hello {msg.value}!"
     return model, None
 
 @app.view
@@ -65,6 +64,8 @@ def view(model: AppModel) -> Element:
 if __name__ == "__main__":
     app.run()
 ```
+
+![](./images/img1.png)
 
 ## Core Principles Explained
 
@@ -103,7 +104,5 @@ We're constantly working to improve fastTEA and add new features. Here's a sneak
 6. **UiBubbles and CmdBubbles**: More structure.
 
 These upcoming features will make fastTEA even more powerful and flexible, opening up new possibilities for your web applications. Stay tuned for updates!
-
-For more examples, documentation, and community support, visit our [GitHub repository](https://github.com/yourusername/fasttea).
 
 Happy coding with fastTEA! 🍵✨

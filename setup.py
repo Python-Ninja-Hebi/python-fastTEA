@@ -6,8 +6,8 @@ def parse_requirements(filename):
         return [line.strip() for line in f if line.strip() and not line.startswith('#')]
 
 setup(
-    name='fasttea',
-    version='0.1.0',
+    name='fasttea-web',
+    version='0.1.1',
     description='fastTEA - Python-Web-Framework with fastAPI and htmx',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
