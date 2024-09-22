@@ -87,6 +87,11 @@ fastTEA combines the best of Python, The Elm Architecture, and modern web techno
 
 Start building your next web application with fastTEA and experience the joy of functional web development in Python!
 
+## More
+
+**FastTEA: A Python Developer's Quest for Elegant Web Apps - Part 1**
+https://medium.com/@hebi_73682/fasttea-a-python-developers-quest-for-elegant-web-apps-part-1-ef86461cbfc5
+
 ### Coming Soon!
 
 We're constantly working to improve fastTEA and add new features. Here's a sneak peek at what's coming:
