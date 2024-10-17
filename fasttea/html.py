@@ -16,14 +16,26 @@ def h1(attributes: Dict[str, Any], children: Union[List[Element], Element, str])
 def h2(attributes: Dict[str, Any], children: Union[List[Element], Element, str]) -> Element:
     return Element("h2", attributes, children)
 
+def h3(attributes: Dict[str, Any], children: Union[List[Element], Element, str]) -> Element:
+    return Element("h3", attributes, children)
+
 def p(attributes: Dict[str, Any], children: Union[List[Element], Element, str]) -> Element:
     return Element("p", attributes, children)
 
 def button(attributes: Dict[str, Any], children: Union[List[Element], Element, str]) -> Element:
     return Element("button", attributes, children)
 
+def fieldset(attributes: Dict[str, Any], children: Union[List[Element], Element, str]) -> Element:
+    return Element("fieldset", attributes, children)
+
+def canvas(attributes: Dict[str, Any], children: Union[List[Element], Element, str]) -> Element:
+    return Element("canvas", attributes, children)
+
 def a(attributes: Dict[str, Any], children: Union[List[Element], Element, str]) -> Element:
     return Element("a", attributes, children)
+
+def i(attributes: Dict[str, Any], children: Union[List[Element], Element, str]) -> Element:
+    return Element("i", attributes, children)
 
 def img(attributes: Dict[str, Any], children: Union[List[Element], Element, str] = "") -> Element:
     return Element("img", attributes, children)

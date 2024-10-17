@@ -2,3 +2,4 @@ pydantic
 toml
 fastapi
 rich
+uvicorn
