@@ -7,7 +7,7 @@ def parse_requirements(filename):
 
 setup(
     name='fasttea-web',
-    version='0.1.1',
+    version='0.2.0',
     description='fastTEA - Python-Web-Framework with fastAPI and htmx',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',

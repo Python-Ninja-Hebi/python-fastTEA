@@ -92,6 +92,9 @@ Start building your next web application with fastTEA and experience the joy of 
 **FastTEA: A Python Developer's Quest for Elegant Web Apps - Part 1**
 https://medium.com/@hebi_73682/fasttea-a-python-developers-quest-for-elegant-web-apps-part-1-ef86461cbfc5
 
+**FastTEA: A Python Developer's Quest for Elegant Web Apps - Part 2**
+https://medium.com/@hebi_73682/fasttea-a-python-developers-quest-for-elegant-web-apps-part-2-a25fc77e09c3
+
 ### Coming Soon!
 
 We're constantly working to improve fastTEA and add new features. Here's a sneak peek at what's coming:
