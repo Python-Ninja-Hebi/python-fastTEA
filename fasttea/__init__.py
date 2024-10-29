@@ -7,31 +7,39 @@ import os
 import toml
 from rich import print
 
+
 class CSSFramework(Enum):
     NONE = ''
     PICO = '<link rel="stylesheet" href="https://unpkg.com/@picocss/pico@2.*/css/pico.min.css">'
     BOOTSTRAP = '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">'
-    TAILWIND = '<script src="https://cdn.tailwindcss.com"></script>' #Tailwind CSS as an option
+    TAILWIND = '<script src="https://cdn.tailwindcss.com"></script>'  #Tailwind CSS as an option
+
 
 # region TEA
 class Model(BaseModel):
     """Base class for the application state"""
     pass
 
+
 class Msg(BaseModel):
     """Base class for messages"""
     action: str
     value: Any = None
 
+
 class Cmd(BaseModel):
     """Base class for commands"""
     action: str
     payload: Dict[str, Any] = {}
+    # New field for automatic message sending
+    return_msg: Union[Msg, None] = None
+
+
 # endregion
 
 # region html
 class Element:
-    _id:int = 0
+    _id: int = 0
 
     def __init__(self, tag: str,
                  attributes: Dict[str, Any],
@@ -43,10 +51,11 @@ class Element:
     def to_htmx(self) -> str:
         self.add_htmx_attributes()
         attrs = ' '.join(f"{k}='{v}'" for k, v in self.attributes.items() if v is not None)
-        children_html = ''.join(child.to_htmx() if isinstance(child, Element) else str(child) for child in self.children)
+        children_html = ''.join(
+            child.to_htmx() if isinstance(child, Element) else str(child) for child in self.children)
         return f"<{self.tag} {attrs}>{children_html}</{self.tag}>"
 
-    def test_add_htmx_attribute(self, attribut:str, value:str):
+    def test_add_htmx_attribute(self, attribut: str, value: str):
         if attribut not in self.attributes:
             self.attributes[attribut] = value
 
@@ -59,13 +68,14 @@ class Element:
             if 'getValue' in self.attributes:
                 id = self.attributes['getValue']
                 self.attributes.pop('getValue')
-                self.attributes["hx-vals"] = f'js:{{"action": "{action}","value": document.getElementById("{id}").value}}'
+                self.attributes[
+                    "hx-vals"] = f'js:{{"action": "{action}","value": document.getElementById("{id}").value}}'
             else:
                 self.attributes["hx-vals"] = f'{{"action": "{action}"}}'
 
             self.attributes.update({
                 "hx-post": "/update",
-                "hx-trigger" : "click",
+                "hx-trigger": "click",
                 "hx-swap": "innerHTML"
             })
             self.test_add_htmx_attribute("hx-target", "#app")
@@ -81,7 +91,7 @@ class Element:
                 trigger = "keyup changed delay:500ms"
 
             if 'id' not in self.attributes:
-                self.attributes['id'] =  self.create_id()
+                self.attributes['id'] = self.create_id()
 
             id = self.attributes['id']
 
@@ -93,10 +103,12 @@ class Element:
             })
             self.test_add_htmx_attribute("hx-target", "#app")
 
-    def create_id(self)->str:
+    def create_id(self) -> str:
         value = f'id{Element._id}'
         Element._id += 1
         return value
+
+
 # endregion
 
 # region uibubble
@@ -106,22 +118,18 @@ class UIBubble:
 
     def render(self) -> Element:
         raise NotImplementedError("Subclasses must implement this method")
-# endregion
 
-# region cmdbubble
-class CmdBubble:
-    def __init__(self, name:str, class_name:str, class_definition:str):
-        self.name = name
-        self.class_name = class_name
-        self.class_definition = class_definition
-#endregion
+
+# endregion
 
 # region htmlbubble
 class HtmlBubble:
-    def __init__(self, name:str, js_libraries: List[str], class_definition:str):
+    def __init__(self, name: str, js_libraries: List[str], class_definition: str):
         self.name = name
         self.js_libraries = js_libraries
         self.class_definition = class_definition
+
+
 #endregion
 
 class FastTEA:
@@ -137,7 +145,6 @@ class FastTEA:
         self.css_framework = css_framework
         self.js_libraries = js_libraries
         self.css_additional = css_additional
-        self.cmd_bubbles: List[CmdBubble] = []  #list to store CmdBubbles
         self.html_bubbles: List[HtmlBubble] = []
         self.cmd_handlers: Dict[str, Callable] = {}  #dictionary to store command handlers
         self.debug = debug
@@ -172,35 +179,50 @@ class FastTEA:
                     {js_links_from_html_bubbles}
                     <title>fastTEA Application</title>
                 </head>
-                <body>
-                    <main class="container">
-                        <div id="app" hx-get="/init" hx-trigger="load"></div>
-                    </main>
-                    <script>
-                        {self.cmd_bubble_classes_js}
-                        {self.html_bubble_classes_js}
-                        {self.generate_cmd_handlers_js}
-                        const app = {{
-                            executeCmd(cmd) {{
-                                if (cmd.action in this.cmdHandlers) {{
-                                    this.cmdHandlers[cmd.action](cmd.payload);
-                                }} else {{
-                                    console.error(`No handler for command: ${{cmd.action}}`);
-                                }}
-                            }},
-                            cmdHandlers: {{}}
-                        }};
-                        {self.add_cmd_handlers_js}
-                        document.body.addEventListener('htmx:afterOnLoad', function(event) {{
-                            const cmdData = event.detail.xhr.getResponseHeader('HX-Trigger');
-                            if (cmdData) {{
-                                const cmd = JSON.parse(cmdData);
-                                app.executeCmd(cmd);
+                 <body>
+                        <main class="container">
+                            <div id="app" hx-get="/init" hx-trigger="load, update from:body"></div>
+                        </main>
+                        <script>
+                            // Helper function for triggering HTMX events with message data
+                           function triggerMsg(action, value) {{
+                                htmx.ajax('POST', '/update', {{
+                                    target: '#app',
+                                    swap: 'innerHTML',
+                                    values: {{
+                                        action: action,
+                                        value: value
+                                    }}
+                                }});
                             }}
-                        }});
-                    </script>
-                    {self._get_js_link()}
-                </body>
+                            
+                            {self.html_bubble_classes_js}
+                            {self.generate_cmd_handlers_js}
+                            const app = {{
+                                executeCmd(cmd) {{
+                                    if (cmd.action in this.cmdHandlers) {{
+                                        const result = this.cmdHandlers[cmd.action](cmd.payload);
+                                        // If command handler returns a message definition, send it
+                                        if (result && result.msg) {{
+                                            triggerMsg(result.msg.action, result.msg.value);
+                                        }}
+                                    }} else {{
+                                        console.error(`No handler for command: ${{cmd.action}}`);
+                                    }}
+                                }},
+                                cmdHandlers: {{}}
+                            }};
+                            {self.add_cmd_handlers_js}
+                            document.body.addEventListener('htmx:afterOnLoad', function(event) {{
+                                const cmdData = event.detail.xhr.getResponseHeader('HX-Trigger');
+                                if (cmdData) {{
+                                    const cmd = JSON.parse(cmdData);
+                                    app.executeCmd(cmd);
+                                }}
+                            }});
+                        </script>
+                        {self._get_js_link()}
+                    </body>
                 </html>
                 """
             if self.debug:
@@ -211,9 +233,6 @@ class FastTEA:
         async def init():
             view_element = self.view_fn(self.model)
             return HTMLResponse(f"""
-                                <script>
-                                    {self.cmd_bubble_instances_js}
-                                </script>
                                 {view_element.to_htmx()}
                             """)
 
@@ -230,25 +249,15 @@ class FastTEA:
 
         @self.app.post("/update")
         async def update(request: Request):
-            content_type = request.headers.get('Content-Type', '')
-            print(f'content type {content_type}')
-            #if 'application/json' in content_type:
-            #    # Für JSON-Daten
-            #    data = await request.json()
-            #    message = data.get('message')
-            #elif 'application/x-www-form-urlencoded' in content_type:
-                # Für Formulardaten
-            #    form_data = await request.form()
-            #    message = form_data.get('message')
-            #else:
-            #    return HTMLResponse("Unbekannter Content-Type")
+            #content_type = request.headers.get('Content-Type', '')
+            #print(f'content type {content_type}')
 
             form_data = await request.form()
-            print(f'form {form_data}')
+            #print(f'form {form_data}')
             action = form_data.get("action")
             value = form_data.get("value")
-            print(f'action {action}')
-            print(f'value {value}')
+            #print(f'action {action}')
+            #print(f'value {value}')
             msg = Msg(action=action, value=value)
             new_model, cmd = self.update_fn(msg, self.model)
             self.model = new_model
@@ -258,13 +267,7 @@ class FastTEA:
                 response.headers["HX-Trigger"] = cmd.json()
             return response
 
-    def cmd_bubble(self, name:str, class_name:str, class_definition:str)->CmdBubble:
-        bubble = CmdBubble(name,class_name, class_definition)
-        self.cmd_bubbles.append(bubble)
-        return bubble
-
-    def html_bubble(self, name:str, js_libraries: List[str], class_definition:str)->HtmlBubble:
-        bubble = HtmlBubble(name,js_libraries, class_definition)
+    def add_html_bubble(self, bubble: HtmlBubble) -> HtmlBubble:
         self.html_bubbles.append(bubble)
         return bubble
 
@@ -277,16 +280,13 @@ class FastTEA:
     @property
     def generate_cmd_handlers_js(self):
         #Generate JavaScript functions for new command handlers
-        cmd_handlers_js = "\n".join(f"function {handler.__name__}(payload) {{ {handler(None)} }}" for handler in self.cmd_handlers.values())
+        cmd_handlers_js = "\n".join(
+            f"function {handler.__name__}(payload) {{ {handler(None)} }}" for handler in self.cmd_handlers.values())
         return cmd_handlers_js
 
     @property
-    def cmd_bubble_classes_js(self):
-        return "\n".join([ i.class_definition for i in self.cmd_bubbles])
-
-    @property
     def html_bubble_classes_js(self):
-        return "\n".join([ i.class_definition for i in self.html_bubbles])
+        return "\n".join([i.class_definition for i in self.html_bubbles])
 
     @property
     def cmd_bubble_instances_js(self):
@@ -307,6 +307,7 @@ class FastTEA:
 
     def cmd(self, action: str):
         """Decorator to handle cmd function"""
+
         def decorator(f: Callable):
             self.cmd_handlers[action] = f
             return f
