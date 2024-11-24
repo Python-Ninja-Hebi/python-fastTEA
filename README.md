@@ -95,6 +95,9 @@ https://medium.com/@hebi_73682/fasttea-a-python-developers-quest-for-elegant-web
 **FastTEA: A Python Developer's Quest for Elegant Web Apps - Part 2**
 https://medium.com/@hebi_73682/fasttea-a-python-developers-quest-for-elegant-web-apps-part-2-a25fc77e09c3
 
+**FastTEA: Behind the Scenes - Diving into JavaScript Integration - Part 3**
+https://medium.com/@hebi_73682/fasttea-behind-the-scenes-diving-into-javascript-integration-part-3-90f27d48b424
+
 ### Coming Soon!
 
 We're constantly working to improve fastTEA and add new features. Here's a sneak peek at what's coming:

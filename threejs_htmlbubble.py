@@ -8,6 +8,7 @@ from typing import Optional
 class CubeModel(Model):
     color: str = "#ff0000"  # Default red color
     rotation_speed: float = 1.0  # Default rotation speed
+    first_time: bool = True # First time start
 
 
 # Initialize FastTEA app
@@ -148,7 +149,8 @@ def update(msg: Msg, model: CubeModel) -> tuple[CubeModel, Optional[Cmd]]:
     if msg.action == "changeColor":
         new_model = CubeModel(
             color=msg.value,
-            rotation_speed=model.rotation_speed
+            rotation_speed=model.rotation_speed,
+            first_time=False
         )
         return new_model, Cmd(action="setColor", payload={"color": msg.value})
 
@@ -156,14 +158,44 @@ def update(msg: Msg, model: CubeModel) -> tuple[CubeModel, Optional[Cmd]]:
         speed = float(msg.value)
         new_model = CubeModel(
             color=model.color,
-            rotation_speed=speed
+            rotation_speed=speed,
+            first_time=False
         )
         return new_model, Cmd(action="setSpeed", payload={"speed": speed})
 
     return model, None
 
 
+
 # View function
+def view_controlls(model: CubeModel) -> Element:
+    # Controls card
+    return card({"id":"view_controlls"}, [
+        div({}, [
+            label({"for": "colorPicker"}, "Cube Color:"),
+            input_({
+                "type": "color",
+                "id": "colorPicker",
+                "value": model.color,
+                "onChange": "changeColor",
+                "hx-target": "#view_controlls"
+            }, [])
+        ]),
+        div({"style": "margin-top: 1rem;"}, [
+            label({"for": "speedSlider"}, f"Rotation Speed ({model.rotation_speed}x):"),
+            input_({
+                "type": "range",
+                "id": "speedSlider",
+                "min": "0",
+                "max": "3",
+                "step": "0.1",
+                "value": str(model.rotation_speed),
+                "onChange": "changeSpeed",
+                "hx-target": "#view_controlls"
+                ""
+            }, [])
+        ])
+    ])
 @app.view
 def view(model: CubeModel) -> Element:
     return container({}, [
@@ -180,33 +212,8 @@ def view(model: CubeModel) -> Element:
                     }, [])
                 ])
             ]),
-            # Controls card
-            card({}, [
-                div({}, [
-                    label({"for": "colorPicker"}, "Cube Color:"),
-                    input_({
-                        "type": "color",
-                        "id": "colorPicker",
-                        "value": model.color,
-                        "onChange": "changeColor"
-                    }, [])
-                ]),
-                div({"style": "margin-top: 1rem;"}, [
-                    label({"for": "speedSlider"}, f"Rotation Speed ({model.rotation_speed}x):"),
-                    input_({
-                        "type": "range",
-                        "id": "speedSlider",
-                        "min": "0",
-                        "max": "3",
-                        "step": "0.1",
-                        "value": str(model.rotation_speed),
-                        "onChange": "changeSpeed"
-                    }, [])
-                ])
-            ])
+            view_controlls(model)
         ])
-    ])
-
-
+    ]) if model.first_time else view_controlls(model)
 
 app.run()
